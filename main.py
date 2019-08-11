@@ -1,5 +1,6 @@
 from collections import deque
 from imutils.video import VideoStream
+from imutils.video import WebcamVideoStream
 import numpy as np
 import argparse
 import cv2
@@ -35,15 +36,14 @@ play_hat = wave_hat.play()
 counter = 0
 (ldY, rdirY) = (0, 0)
 
-vs = VideoStream(src=0).start()
-
+vs = WebcamVideoStream(src=0).start()
 time.sleep(1.0)
 
 while True:
     frame = vs.read()
+    frame = imutils.resize(frame, width=600)
     frame = cv2.flip(frame, 1)
 
-    frame = imutils.resize(frame, width=600)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     mask = cv2.inRange(hsv, objLower, objUpper)
@@ -77,17 +77,9 @@ while True:
         if (left):
             lpts.appendleft(center[i])
             for j in np.arange(1, 8):
-                # if either of the tracked points are None, ignore
-                # them
-                #if lpts[j - 1] is None or lpts[j] is None:
-                #    continue
-
-                # check to see if enough points have been accumulated in
-                # the buffer
                 if counter >= 8 and j == 1 and lpts[-8] is not None:
                     # compute the difference between the x and y
                     # coordinates and re-initialize the direction
-                    # text variables
                     ldY = lpts[-8][1] - lpts[j][1]
                     if(lisDown and ldY < 0):
                         if (xQue[i] <=200):
@@ -106,17 +98,9 @@ while True:
         else:
             rpts.appendleft(center[i])
             for j in np.arange(1, 8):
-                # if either of the tracked points are None, ignore
-                # them
-                #if rpts[j - 1] is None or rpts[j] is None:
-                #    continue
-
-                # check to see if enough points have been accumulated in
-                # the buffer
                 if counter >= 8 and j == 1 and rpts[-8] is not None:
                     # compute the difference between the x and y
                     # coordinates and re-initialize the direction
-                    # text variables
                     rdY = rpts[-8][1] - rpts[j][1]
                     if(risDown and rdY < 0):
                         if (xQue[i] <=200):
@@ -142,6 +126,4 @@ while True:
     if key == ord("q"):
         break
 vs.stop()
-
-# close all windows
 cv2.destroyAllWindows()
