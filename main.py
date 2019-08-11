@@ -14,20 +14,23 @@ ap.add_argument("-b", "--buffer", type=int, default=8,
     help="max buffer size")
 args = vars(ap.parse_args())
 
+lpts = deque(maxlen=args["buffer"])
+rpts = deque(maxlen=args["buffer"])
 
-(ldirY, rdirY) = ("", "")
+xQue = deque(maxlen=2)
+center = deque(maxlen=2)
+
+(lisDown, risDown) = (False, False)
 
 objLower = (30, 86, 14)
 objUpper = (97, 244, 255)
 
 wave_clap = sa.WaveObject.from_wave_file("audio/Clap.wav")
-play_clap = wave_clap.play()
 wave_kick = sa.WaveObject.from_wave_file("audio/Kick.wav")
+wave_hat = sa.WaveObject.from_wave_file("audio/Hat.wav")
+play_clap = wave_clap.play()
 play_kick = wave_kick.play()
-
-
-lpts = deque(maxlen=args["buffer"])
-rpts = deque(maxlen=args["buffer"])
+play_hat = wave_hat.play()
 
 counter = 0
 (ldY, rdirY) = (0, 0)
@@ -52,70 +55,84 @@ while True:
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    center = None
 
     # sort cnts so we can loop through the two biggest (the sticks hopefully)
     cnts = sorted(cnts,key=lambda x: cv2.contourArea(x), reverse = True)
     for i in range(min(len(cnts), 2)):
         ((x, y), radius) = cv2.minEnclosingCircle(cnts[i])
+        xQue.appendleft(x)
         M = cv2.moments(cnts[i])
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-        # only proceed if the radius meets a minimum size
-        if radius > 8:
-            if (x <= 300):
+        center.appendleft((int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"])))
+    for i in range(min(len(cnts), 2)):
+        if (len(cnts) > 1):
+            if (xQue[i] <= xQue[(i+1)%2]):
                 left = True
             else:
                 left = False
-            if (left):
-                lpts.appendleft(center)
-                for j in np.arange(1, len(lpts)):
-                    # if either of the tracked points are None, ignore
-                    # them
-                    if lpts[j - 1] is None or lpts[j] is None:
-                        continue
+        else:
+            if(xQue[i] <= 300):
+                left = True
+            else: 
+                left = False
+        if (left):
+            lpts.appendleft(center[i])
+            for j in np.arange(1, 8):
+                # if either of the tracked points are None, ignore
+                # them
+                #if lpts[j - 1] is None or lpts[j] is None:
+                #    continue
 
-                    # check to see if enough points have been accumulated in
-                    # the buffer
-                    if counter >= 8 and j == 1 and lpts[-8] is not None:
-                        # compute the difference between the x and y
-                        # coordinates and re-initialize the direction
-                        # text variables
-                        ldY = lpts[-8][1] - lpts[j][1]
-                        if np.abs(ldY) > 30:
-                            if(ldY >= 0):
-                             ldirY = "down"
-                    
-                        if(ldirY == "down" and ldY < 0):
+                # check to see if enough points have been accumulated in
+                # the buffer
+                if counter >= 8 and j == 1 and lpts[-8] is not None:
+                    # compute the difference between the x and y
+                    # coordinates and re-initialize the direction
+                    # text variables
+                    ldY = lpts[-8][1] - lpts[j][1]
+                    if(lisDown and ldY < 0):
+                        if (xQue[i] <=200):
                             play_kick = wave_kick.play()
-                            ldirY = "up"
-
-                cv2.circle(frame, center, 5, (0, 0, 255), -1)
-            else:
-                rpts.appendleft(center)
-                for j in np.arange(1, len(rpts)):
-                    # if either of the tracked points are None, ignore
-                    # them
-                    if rpts[j - 1] is None or rpts[j] is None:
-                        continue
-
-                    # check to see if enough points have been accumulated in
-                    # the buffer
-                    if counter >= 8 and j == 1 and rpts[-8] is not None:
-                        # compute the difference between the x and y
-                        # coordinates and re-initialize the direction
-                        # text variables
-                        rdY = rpts[-8][1] - rpts[j][1]
-                        if np.abs(rdY) > 30:
-                            if(rdY >= 0):
-                             rdirY = "down"
-                    
-                        if(rdirY == "down" and rdY < 0):
+                        elif (xQue[i] <=400):
                             play_clap = wave_clap.play()
-                            rdirY = "up"
+                        else:
+                            play_hat = wave_hat.play()
+                        lisDown = False
 
-                cv2.circle(frame, center, 5, (255, 0, 0), -1)
-    
+                    if np.abs(ldY) > 30 and ldY >=0:
+                        #if(ldY >= 0):
+                        lisDown = True
+                
+            cv2.circle(frame, center[i], 5, (0, 0, 255), -1)
+        else:
+            rpts.appendleft(center[i])
+            for j in np.arange(1, 8):
+                # if either of the tracked points are None, ignore
+                # them
+                #if rpts[j - 1] is None or rpts[j] is None:
+                #    continue
+
+                # check to see if enough points have been accumulated in
+                # the buffer
+                if counter >= 8 and j == 1 and rpts[-8] is not None:
+                    # compute the difference between the x and y
+                    # coordinates and re-initialize the direction
+                    # text variables
+                    rdY = rpts[-8][1] - rpts[j][1]
+                    if(risDown and rdY < 0):
+                        if (xQue[i] <=200):
+                            play_kick = wave_kick.play()
+                        elif (xQue[i] <=400):
+                            play_clap = wave_clap.play()
+                        else:
+                            play_hat = wave_hat.play()
+                        risDown = False
+
+                    if np.abs(rdY) > 30 and rdY >=0:
+                        #if(rdY >= 0):
+                        risDown = True
+                
+            cv2.circle(frame, center[i], 5, (255, 0, 0), -1)
+
     # show the frame to our screen and increment the frame counter
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
