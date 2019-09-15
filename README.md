@@ -20,7 +20,7 @@ This project has been a way for me to learn and get experience with computer vis
 * Tracks two colored drum sticks and calculates ”hits” based off changes in downward movement
 
 ## Credits
-[pyimageserach](https://www.pyimagesearch.com) tutorials on masking colors and tracking objects were greatly useful for this project. I followed the tutorial on tracking a solid colored ball and expanded it to work for a drumming application.
+[PyImageSearch](https://www.pyimagesearch.com) has excellent tutorials on masking colors and tracking objects that were greatly useful for this project. I followed the tutorial on tracking a solid colored ball and expanded it to work for a drumming application.
 
 ### Future Development:
 * C++ implementation should help reduce latency
