@@ -7,7 +7,7 @@ This project has been a way for me to learn and get experience with computer vis
 ### Demo Video:
 [![Watch the Video](https://img.youtube.com/vi/Y4xpyyZx3xc/0.jpg)](https://www.youtube.com/embed/Y4xpyyZx3xc)
 
-## Tech/framework used
+## Tech/libraries used
 <b>Built with</b>
 - [OpenCV](https://opencv.org)
 - [NumPy](https://numpy.org)
