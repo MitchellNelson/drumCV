@@ -8,13 +8,6 @@ import imutils
 import time
 import simpleaudio as sa
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video",
-    help="path to the (optional) video file")
-ap.add_argument("-b", "--buffer", type=int, default=8,
-   help="max buffer size")
-args = vars(ap.parse_args())
-
 lpts = deque(maxlen=8)#args["buffer"]) #buffer to hold left stick coordinates
 rpts = deque(maxlen=8)#args["buffer"]) #buffer to hold right stick coordinates
 
@@ -23,28 +16,17 @@ center = deque(maxlen=2) #length 2 buffer to hold center positions of l and r st
 
 (lisDown, risDown) = (False, False)
 
+# Upper and lower bounds (HSV) for the stick color
 objLower = (30, 86, 14)
 objUpper = (97, 244, 255)
 
+# Load and init audio
 wave_clap  = sa.WaveObject.from_wave_file("audio/Clap.wav")
-wave_clap2 = sa.WaveObject.from_wave_file("audio/Clap2.wav")
-wave_clap3 = sa.WaveObject.from_wave_file("audio/Clap3.wav")
 wave_kick  = sa.WaveObject.from_wave_file("audio/Kick.wav")
-wave_kick2 = sa.WaveObject.from_wave_file("audio/Kick2.wav")
-wave_kick3 = sa.WaveObject.from_wave_file("audio/Kick3.wav")
 wave_hat   = sa.WaveObject.from_wave_file("audio/Hat.wav")
-wave_hat2  = sa.WaveObject.from_wave_file("audio/Hat2.wav")
-wave_hat3  = sa.WaveObject.from_wave_file("audio/Hat3.wav")
-
 play_clap  = wave_clap.play()
-play_clap2 = wave_clap2.play()
-play_clap3 = wave_clap3.play()
 play_kick  = wave_kick.play()
-play_kick2 = wave_kick2.play()
-play_kick3 = wave_kick3.play()
 play_hat   = wave_hat.play()
-play_hat2  = wave_hat2.play()
-play_hat3  = wave_hat3.play()
 
 frameCount = 0
 (ldY, rdirY) = (0, 0)
@@ -53,15 +35,18 @@ vs = WebcamVideoStream(src=0).start()
 time.sleep(1.0)
 
 while True:
+
+    # Read in 1 frame at a time and flip the image
     frame = vs.read()
     frame = cv2.flip(frame, 1)
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+    # Mask the image so the result is just the drum stick tips
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, objLower, objUpper)
     mask = cv2.erode(mask, None, iterations=2)
 
     # find contours in the mask and initialize the current
-    # (x, y) center of the ball
+    # (x, y) center of the stick tips
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
@@ -87,8 +72,7 @@ while True:
         if (left):
             lpts.appendleft(center[i])
             if frameCount >= 4 and lpts[4] is not None:
-                # compute the difference in direction between current frame
-                # and from 4-frames-ago
+                # compute the difference in direction between current frame and from 4-frames-ago
                 ldY = lpts[4][1] - lpts[1][1]
                 
                 #Threshold of 10 pixels for downward direction
@@ -98,13 +82,7 @@ while True:
                     if (xQue[i] <=200):
                         play_kick = wave_kick.play()
                     elif (xQue[i] <=400):
-                        print(ldY)
-                        if (ldY < -70):
-                            play_clap = wave_clap.play()
-                        elif (ldY < -60):
-                            play_clap2 = wave_clap.play()
-                        else:
-                            play_clap3 = wave_clap3.play()
+                        play_clap = wave_clap.play()
                     else:
                         play_hat = wave_hat.play()
                     lisDown = False
@@ -116,8 +94,7 @@ while True:
         else:
             rpts.appendleft(center[i])
             if frameCount >= 4 and rpts[4] is not None:
-                # compute the difference in direction between current frame
-                # and from 4-frames-ago
+                # compute the difference in direction between current frame and from 4-frames-ago
                 rdY = rpts[4][1] - rpts[1][1]
 
                 #Threshold of 10 pixels for downward direction 
