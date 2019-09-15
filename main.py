@@ -75,7 +75,7 @@ while True:
                 # compute the difference in direction between current frame and from 4-frames-ago
                 ldY = lpts[4][1] - lpts[1][1]
                 
-                #Threshold of 10 pixels for downward direction
+                #Threshold of 20 pixels for downward direction
                 if(lisDown and ldY < -20):
                     # Play sound according to x position
                     # Play different volume sample based on distance moved
@@ -97,7 +97,7 @@ while True:
                 # compute the difference in direction between current frame and from 4-frames-ago
                 rdY = rpts[4][1] - rpts[1][1]
 
-                #Threshold of 10 pixels for downward direction 
+                #Threshold of 20 pixels for downward direction 
                 if(risDown and rdY < -20):
                     #Play sound according to x position
                     if (xQue[i] <=200):
