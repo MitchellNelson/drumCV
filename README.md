@@ -2,7 +2,7 @@
 Computer vision drum simulator that produces drum sounds while a user is "air drumming" with two colored drum sticks in front of a webcam.
 
 ## Motivation
-This project has been a way for me to learn and get experience with computer vision. I am a drummer, so I naturally try and connect my two passions - technology and music. 
+This project has been a way to learn and get experience with computer vision.
 
 ### Demo Video: 
 [![Watch the Video](https://img.youtube.com/vi/NtF3ADvZBPs/0.jpg)](https://www.youtube.com/watch?v=NtF3ADvZBPs)
