@@ -5,7 +5,7 @@ Computer vision drum simulator that produces drum sounds while a user is "air dr
 This project has been a way for me to learn and get experience with computer vision. I am a drummer, so I naturally try and connect my two passions - technology and music. 
 
 ### Demo Video:
-[![Watch the Video](https://img.youtube.com/vi/z6Y6_-EegAY/0.jpg)](https://www.youtube.com/embed/z6Y6_-EegAY)
+[![Watch the Video](https://img.youtube.com/vi/NtF3ADvZBPs/0.jpg)](https://www.youtube.com/watch?v=NtF3ADvZBPs)
 
 ## Tech/libraries used
 <b>Built with</b>
