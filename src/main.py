@@ -1,6 +1,8 @@
 from collections import deque
 from webcamvideostream import WebcamVideoStream
 from DrumSound import DrumSound
+from imutils.video import FileVideoStream
+from imutils.video import FPS
 from Stick import Stick
 import os
 import numpy as np
@@ -10,12 +12,12 @@ import imutils
 import time
 import simpleaudio as sa
 
-snare = DrumSound("audio/", "Snare", 5, ".wav")
-kick = DrumSound("audio/", "Kick", 5, ".wav")
-tom = DrumSound("audio/", "Tom", 5, ".wav")
-floor = DrumSound("audio/", "Floor", 5, ".wav")
-hihat = DrumSound("audio/", "Hat", 5, ".wav")
-ride = DrumSound("audio/", "Ride", 5, ".wav")
+snare = DrumSound("../audio/", "Snare", 5, ".wav")
+kick = DrumSound("../audio/", "Kick", 5, ".wav")
+tom = DrumSound("../audio/", "Tom", 5, ".wav")
+floor = DrumSound("../audio/", "Floor", 5, ".wav")
+hihat = DrumSound("../audio/", "Hat", 5, ".wav")
+ride = DrumSound("../audio/", "Ride", 5, ".wav")
 
 def trackStick(stick):
     stick.setMin(min(stick.getMin(), stick.getY()))
@@ -33,7 +35,7 @@ def trackStick(stick):
     return 
 
 def playDrumByPosition(x, y, volume):
-    if (x < 200):
+    if (x < 150):
         kick.play(volume)
     elif (x < 450):
         snare.play(volume)
@@ -51,16 +53,19 @@ def main():
     objUpper = (97, 244, 255)
     frameCount = 0
     vs = WebcamVideoStream(src=0).start()
+
+    #vs = FileVideoStream(0).start()
     time.sleep(1.0)
     while True:
         # Read in 1 frame at a time and flip the image
         frame = vs.read()
+        
+        #frame = imutils.resize(frame, width = 600, height = 300)
         frame = cv2.flip(frame, 1)
         overlay = frame.copy()
         alpha = 0.5
         cv2.line(overlay,(150,0),(150,600),(138,138,138),1)
-        cv2.addWeighted(overlay, alpha, frame, 1 - alpha,
-		0, frame)
+        cv2.addWeighted(overlay, alpha, frame, 1 - alpha,0, frame)
         cv2.line(frame,(450,0),(450,600),(138,138,138),1)
 
         # Mask the image so the result is just the drum stick tips
@@ -78,7 +83,7 @@ def main():
         numSticks = min(len(cnts), 2)
         for i in range(numSticks):
             ((x, y), radius) = cv2.minEnclosingCircle(cnts[i])
-            if (radius > 5):
+            if (radius > 4):
                 center.appendleft((int(x),int(y)))
         for i in range(numSticks):
             if (numSticks > 1):
